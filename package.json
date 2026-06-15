@@ -1,0 +1,19 @@
+{
+  "name": "reserva-de-akora-casa",
+  "version": "1.0.0",
+  "description": "Sitio web para la venta de vivienda en Reserva de Akora, Tocancipá",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "build": "cd client && npm install && npm run build",
+    "postinstall": "cd client && npm install"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "compression": "^1.7.4"
+  }
+}
