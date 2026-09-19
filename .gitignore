@@ -6,3 +6,10 @@ client/dist/
 *.log
 dist/
 .azure/
+
+# Paquetes de despliegue
+*.zip
+
+# Fotos fuente sin procesar (se quedan locales)
+fotosPost/
+fotosPost-ordenadas/

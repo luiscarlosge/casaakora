@@ -1,8 +1,9 @@
 export const casa = {
   titulo: 'Casa Multinivel en Venta',
   subtitulo: 'Reserva de Akora · Tocancipá, Cundinamarca',
-  precio: '$420.000.000',
-  precioTexto: '420 millones de pesos (negociables)',
+  precio: '$430.000.000',
+  precioCorto: '$430M',
+  precioTexto: '430 millones de pesos (negociables)',
   administracion: '$420.000 / mes',
   area: 104,
   pisos: 3,
@@ -249,3 +250,17 @@ export const fotos = [
     emoji: '🚶',
   },
 ];
+
+
+// Rutas de imagen: miniatura ligera para grillas, panorama 4K para el visor 360
+export const IMG = {
+  thumb: (archivo) => `/fotos360/thumbs/${archivo}`,
+  web: (archivo) => `/fotos360/web/${archivo}`,
+  full: (archivo) => `/fotos360/${archivo}`,
+};
+
+export const CONTACTO = {
+  whatsapp1: '573046267937',
+  whatsapp2: '573164654180',
+  mensaje: '¡Hola! Me interesa la casa en Reserva de Akora, Tocancipá. ¿Podría darme más información?',
+};

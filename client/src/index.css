@@ -5,40 +5,93 @@
 @layer base {
   html {
     scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+    /* Compensa el navbar fijo al saltar a una sección */
+    scroll-padding-top: 80px;
   }
   body {
     @apply font-sans text-carbon bg-crema;
+    overflow-x: hidden;
   }
   h1, h2, h3, h4 {
     @apply font-serif;
+    text-wrap: balance;
+  }
+  p {
+    text-wrap: pretty;
+  }
+  img {
+    max-width: 100%;
+  }
+  /* Área táctil mínima cómoda en móvil */
+  button, a {
+    -webkit-tap-highlight-color: rgba(201, 168, 76, 0.2);
   }
 }
 
 @layer components {
+  .container-page {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+  .section-pad {
+    @apply py-14 sm:py-16 lg:py-20;
+  }
   .btn-primary {
     @apply bg-dorado text-white font-semibold px-6 py-3 rounded-sm
            hover:bg-dorado-dark transition-colors duration-200
-           inline-flex items-center gap-2;
+           inline-flex items-center justify-center gap-2 min-h-[48px];
   }
   .btn-outline {
     @apply border-2 border-dorado text-dorado font-semibold px-6 py-3 rounded-sm
            hover:bg-dorado hover:text-white transition-colors duration-200
-           inline-flex items-center gap-2;
+           inline-flex items-center justify-center gap-2 min-h-[48px];
   }
   .section-title {
-    @apply font-serif text-3xl md:text-4xl text-carbon mb-2;
+    @apply font-serif text-2xl sm:text-3xl md:text-4xl text-carbon mb-2;
   }
   .section-subtitle {
-    @apply text-dorado font-medium text-sm tracking-widest uppercase mb-4;
+    @apply text-dorado font-medium text-xs sm:text-sm tracking-widest uppercase mb-3;
   }
   .divider-gold {
-    @apply w-16 h-0.5 bg-dorado mt-4 mb-6;
+    @apply w-14 sm:w-16 h-0.5 bg-dorado mt-4 mb-5 sm:mb-6;
+  }
+  /* Fila de filtros deslizable en móvil */
+  .scroll-row {
+    @apply flex gap-2 overflow-x-auto snap-x snap-mandatory pb-2 -mx-4 px-4
+           sm:mx-0 sm:px-0 sm:overflow-visible sm:flex-wrap sm:justify-center;
+    scrollbar-width: none;
+  }
+  .scroll-row::-webkit-scrollbar {
+    display: none;
+  }
+  .scroll-row > * {
+    @apply snap-start flex-shrink-0;
+  }
+}
+
+@layer utilities {
+  /* Respeta el notch / barra de gestos en iOS */
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .pt-safe {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+  /* Altura real de viewport en móvil (evita el salto por la barra del navegador) */
+  .min-h-screen-dvh {
+    min-height: 100vh;
+    min-height: 100svh;
+  }
+  .h-screen-dvh {
+    height: 100vh;
+    height: 100dvh;
   }
 }
 
 /* Pannellum viewer */
 .pnlm-container {
   background: #1C1C2E !important;
+  touch-action: none;
 }
 .pnlm-load-box {
   background: rgba(28, 28, 46, 0.9) !important;
@@ -47,10 +100,23 @@
 .pnlm-lbar {
   background: #C9A84C !important;
 }
+/* Controles más grandes y tocables en móvil */
+@media (max-width: 640px) {
+  .pnlm-controls-container {
+    top: auto !important;
+    bottom: 12px !important;
+    left: 12px !important;
+  }
+  .pnlm-control {
+    width: 40px !important;
+    height: 40px !important;
+  }
+}
 
 /* Scrollbar personalizado */
 ::-webkit-scrollbar {
   width: 6px;
+  height: 6px;
 }
 ::-webkit-scrollbar-track {
   background: #F7F3ED;
@@ -69,11 +135,28 @@
   animation: fadeInUp 0.6s ease-out forwards;
 }
 
-/* Modal overlay */
 .modal-overlay {
   animation: fadeIn 0.2s ease-out;
 }
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+.animate-slide-up {
+  animation: slideUp 0.25s ease-out forwards;
+}
+
+/* Respeta usuarios con movimiento reducido */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

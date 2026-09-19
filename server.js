@@ -9,26 +9,42 @@ const PORT = process.env.PORT || 3000;
 // Gzip compression para mejor performance
 app.use(compression());
 
-// Servir fotos 360 con cache de 7 días
+// Confía en el proxy de Azure App Service (IP real, https)
+app.set('trust proxy', true);
+
+// Fotos 360: /fotos360/thumbs (miniaturas) y /fotos360/web (panoramas 4K)
 app.use('/fotos360', express.static(path.join(__dirname, 'Fotos360'), {
-  maxAge: '7d',
+  maxAge: '30d',
   immutable: true,
 }));
 
-// API: listar fotos disponibles
+// API: listar los panoramas disponibles
 app.get('/api/fotos', (req, res) => {
-  const dir = path.join(__dirname, 'Fotos360');
+  const dir = path.join(__dirname, 'Fotos360', 'web');
   try {
     const files = fs.readdirSync(dir)
       .filter(f => /\.(jpg|jpeg|png)$/i.test(f))
-      .map(f => ({ nombre: f, url: `/fotos360/${f}` }));
+      .map(f => ({
+        nombre: f,
+        url: `/fotos360/web/${f}`,
+        thumb: `/fotos360/thumbs/${f}`,
+      }));
     res.json(files);
   } catch (e) {
     res.status(500).json({ error: 'No se pudieron cargar las fotos' });
   }
 });
 
-// Servir la app React compilada
+// Health check para Azure
+app.get('/health', (req, res) => res.json({ ok: true, uptime: process.uptime() }));
+
+// Assets con hash en el nombre: cache agresivo
+app.use('/assets', express.static(path.join(__dirname, 'client/dist/assets'), {
+  maxAge: '1y',
+  immutable: true,
+}));
+
+// Resto de la app React compilada
 app.use(express.static(path.join(__dirname, 'client/dist'), {
   maxAge: '1h',
 }));

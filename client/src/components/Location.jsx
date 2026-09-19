@@ -9,23 +9,25 @@ const distancias = [
 
 export default function Location() {
   return (
-    <section className="py-20 bg-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="grid md:grid-cols-2 gap-12 items-start">
+    <section id="ubicacion" className="section-pad bg-white">
+      <div className="container-page">
+        <div className="grid md:grid-cols-2 gap-8 lg:gap-12 items-start">
           {/* Info */}
           <div>
             <p className="section-subtitle">Ubicación</p>
             <h2 className="section-title">Tocancipá, Cundinamarca</h2>
             <div className="divider-gold" />
-            <div className="flex items-start gap-3 mb-6">
+            <div className="flex items-start gap-3 mb-5 sm:mb-6">
               <MapPin size={18} className="text-dorado flex-shrink-0 mt-0.5" />
               <div>
-                <p className="font-semibold text-carbon">Conjunto Residencial Reserva de Akora</p>
+                <p className="font-semibold text-carbon text-sm sm:text-base">
+                  Conjunto Residencial Reserva de Akora
+                </p>
                 <p className="text-carbon/60 text-sm">Tocancipá, Cundinamarca, Colombia</p>
               </div>
             </div>
 
-            <p className="text-carbon/70 leading-relaxed mb-8">
+            <p className="text-carbon/70 text-sm sm:text-base leading-relaxed mb-6 sm:mb-8">
               Tocancipá es uno de los municipios de mayor crecimiento en la Sabana Norte,
               con excelente conectividad a Bogotá y una creciente oferta de servicios, comercio,
               educación y entretenimiento. Ideal para familias que buscan calidad de vida
@@ -33,20 +35,23 @@ export default function Location() {
             </p>
 
             {/* Distancias */}
-            <div className="space-y-3">
+            <div className="space-y-2 sm:space-y-3">
               <h3 className="font-semibold text-carbon flex items-center gap-2 text-sm">
                 <Car size={16} className="text-dorado" />
                 Distancias aproximadas
               </h3>
               {distancias.map((d, i) => (
-                <div key={i} className="flex items-center justify-between py-3 border-b border-carbon/10">
-                  <div>
-                    <p className="text-carbon text-sm font-medium">{d.lugar}</p>
-                    <p className="text-carbon/40 text-xs">{d.via}</p>
+                <div
+                  key={i}
+                  className="flex items-center justify-between gap-3 py-2.5 sm:py-3 border-b border-carbon/10"
+                >
+                  <div className="min-w-0">
+                    <p className="text-carbon text-sm font-medium truncate">{d.lugar}</p>
+                    <p className="text-carbon/40 text-xs truncate">{d.via}</p>
                   </div>
-                  <div className="flex items-center gap-1.5 text-dorado">
+                  <div className="flex items-center gap-1.5 text-dorado flex-shrink-0">
                     <Clock size={13} />
-                    <span className="text-sm font-semibold">{d.tiempo}</span>
+                    <span className="text-sm font-semibold whitespace-nowrap">{d.tiempo}</span>
                   </div>
                 </div>
               ))}
@@ -54,12 +59,12 @@ export default function Location() {
           </div>
 
           {/* Mapa */}
-          <div className="rounded-sm overflow-hidden shadow-lg h-80 md:h-full min-h-80 bg-carbon/5">
+          <div className="rounded-sm overflow-hidden shadow-lg h-64 sm:h-80 md:h-full md:min-h-[420px] bg-carbon/5 order-first md:order-last">
             <iframe
               title="Ubicación Reserva de Akora Tocancipá"
               width="100%"
               height="100%"
-              style={{ border: 0, minHeight: '320px' }}
+              style={{ border: 0, minHeight: '256px', display: 'block' }}
               loading="lazy"
               allowFullScreen
               referrerPolicy="no-referrer-when-downgrade"

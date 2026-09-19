@@ -163,26 +163,47 @@ Durante el push, Azure ejecuta automáticamente:
 3. Autorizar y seleccionar el repositorio/rama
 4. Azure genera automáticamente el workflow `.github/workflows/`
 
-#### Opción C — ZIP Deploy
+#### Opción C — ZIP Deploy (recomendado)
+
+El paquete `casa-azure-deploy.zip` (~16 MB) ya está listo en la raíz del repo e incluye
+`server.js`, `package.json`, `node_modules`, el cliente compilado (`client/dist`) y las
+fotos optimizadas (`Fotos360/web` + `Fotos360/thumbs`). Trae `.deployment` con
+`SCM_DO_BUILD_DURING_DEPLOYMENT=false`, así que Azure no necesita compilar nada.
 
 ```bash
-# Compilar el cliente primero
-npm run build
-
-# Comprimir (excluye node_modules)
-zip -r deploy.zip . \
-  --exclude "*/node_modules/*" \
-  --exclude "client/node_modules/*" \
-  --exclude ".git/*" \
-  --exclude "*.log"
-
-# Desplegar
 az webapp deploy \
   --name $APP_NAME \
   --resource-group $RESOURCE_GROUP \
-  --src-path deploy.zip \
+  --src-path casa-azure-deploy.zip \
   --type zip
 ```
+
+Para regenerarlo después de cambiar el sitio:
+
+```bash
+# 1) Recompilar el cliente
+npm run build
+
+# 2) Regenerar las fotos optimizadas (solo si agregas fotos nuevas a Fotos360/)
+#    web/   → panoramas 4096x2048 para el visor 360
+#    thumbs/→ miniaturas 800x400 para las grillas
+cd Fotos360
+for f in *.jpg; do
+  convert "$f" -resize 4096x2048! -quality 82 -strip -interlace Plane "web/$f"
+  convert "$f" -resize 800x400!   -quality 78 -strip -interlace Plane "thumbs/$f"
+done
+cd ..
+
+# 3) Empaquetar
+rm -f casa-azure-deploy.zip
+zip -r -9 casa-azure-deploy.zip \
+  server.js package.json .deployment node_modules \
+  client/dist Fotos360/web Fotos360/thumbs \
+  -x "*.DS_Store"
+```
+
+> Las fotos originales de 8–14 MB **no** se suben: se quedan en `Fotos360/` como
+> archivo maestro. El sitio sirve las versiones optimizadas.
 
 ### 5. Agregar dominio personalizado (opcional)
 
