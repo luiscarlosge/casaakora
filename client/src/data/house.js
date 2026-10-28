@@ -1,9 +1,9 @@
 export const casa = {
   titulo: 'Casa Multinivel en Venta',
   subtitulo: 'Reserva de Akora · Tocancipá, Cundinamarca',
-  precio: '$430.000.000',
-  precioCorto: '$430M',
-  precioTexto: '430 millones de pesos (negociables)',
+  precio: '$417.000.000',
+  precioCorto: '$417M',
+  precioTexto: '417 millones de pesos (negociables)',
   administracion: '$420.000 / mes',
   area: 104,
   pisos: 3,
