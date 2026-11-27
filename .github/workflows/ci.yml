@@ -64,7 +64,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - uses: hashicorp/setup-terraform@v3
+      - uses: hashicorp/setup-terraform@v4
         with:
           terraform_version: "~1.9"
           terraform_wrapper: false
@@ -111,7 +111,7 @@ jobs:
 
       - name: Comentar plan en el PR
         if: steps.plan.outcome == 'success' && github.event_name == 'pull_request'
-        uses: marocchino/sticky-pull-request-comment@v2
+        uses: marocchino/sticky-pull-request-comment@v3
         with:
           header: terraform-plan-dev
           path: infra/plan.md
