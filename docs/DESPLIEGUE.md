@@ -4,7 +4,7 @@ Resultado final:
 
 | Ambiente | URL | Plan | Cuándo se despliega |
 |---|---|---|---|
-| **dev** | https://casa-reserva-akora-dev.azurewebsites.net | F1 (gratis) | Automático en cada push/merge a `main` |
+| **dev** | https://casa-reserva-akora-dev.azurewebsites.net | B1 (~13 USD/mes) | Automático en cada push/merge a `main` |
 | **prod** | https://casa-reserva-akora.azurewebsites.net | B1 (~13 USD/mes) | Después de dev, **con tu aprobación** |
 
 ```
@@ -138,7 +138,7 @@ gh pr create --fill          # o desde la web
 ```
 
 1. En el PR corre **CI**: pruebas, build y el `terraform plan` de dev comentado en el PR
-   (en el primer PR mostrará `Plan: 2 to add`: plan F1 + web app).
+   (en el primer PR mostrará `Plan: 2 to add`: plan B1 + web app).
 2. Haz merge → corre **CD**:
    - `build` arma `app.zip` (~21 MB: servidor, `node_modules` de producción, `client/dist`,
      `Fotos360/web` y `Fotos360/thumbs` + `build-info.json` con el commit).
@@ -187,12 +187,12 @@ terraform plan -var-file=environments/prod.tfvars
 
 | Recurso | Costo aprox. |
 |---|---|
-| Plan F1 (dev) | 0 |
+| Plan B1 (dev) | ~13 USD/mes |
 | Plan B1 (prod) | ~13 USD/mes |
 | App Insights + Log Analytics (prod, techo 0.5 GB/día) | 0 dentro de los 5 GB/mes gratis |
 | Storage del estado | centavos |
 
-Para bajar costo: `sku_name = "F1"` en `prod.tfvars` (pierdes Always On; el primer visitante
+Para bajar costo (si la suscripción tiene cuota F1): `sku_name = "F1"` en `dev.tfvars` y/o `prod.tfvars` (pierdes Always On; el primer visitante
 después de un rato espera el arranque en frío y hay 60 min de CPU/día).
 
 ## Cuando se venda la casa 🎉
@@ -215,5 +215,5 @@ recibir el tráfico de tu dominio (*subdomain takeover*).
 | `AuthorizationFailed ... Microsoft.Storage/.../blobs` en `terraform init` | Los permisos de datos tardan unos minutos en propagarse tras el bootstrap; reintenta. |
 | `Website with given name casa-reserva-akora already exists` | Ver paso 1. |
 | `The 'Free' tier ... maximum number of free plans` | Solo se permite un plan F1 Linux por región/suscripción. Cambia `sku_name` en `dev.tfvars` a `B1` o elimina el otro plan F1. |
-| Smoke test se agota en dev | F1 consume 60 min de CPU al día y puede detenerse por cuota; revisa *Quotas* en el portal. |
+| `Operation cannot be completed without additional quota ... Current Limit (F1 App Service instances): 0` | La suscripción no tiene cuota para ese SKU. Pídela en https://aka.ms/azure-quota (proveedor App Service, región del despliegue) o usa otro SKU/región. |
 | El sitio muestra una versión vieja | `curl .../health` muestra el commit desplegado; mira el job `Dev`/`Prod` del último run. |
