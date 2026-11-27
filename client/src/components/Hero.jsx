@@ -13,7 +13,7 @@ export default function Hero({ onVerTour }) {
         <img
           src="/hero-tall.jpg"
           alt="Fachada de la casa en Reserva de Akora, Tocancipá"
-          fetchPriority="high"
+          fetchpriority="high"
           className="absolute inset-0 w-full h-full object-cover"
         />
       </picture>

@@ -1,0 +1,81 @@
+name: CD
+
+# main → build → dev (automático) → prod (requiere aprobación en el environment "prod")
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write # OIDC hacia Azure
+
+# Nunca dos despliegues a la vez (protege también el estado de Terraform)
+concurrency:
+  group: cd-main
+  cancel-in-progress: false
+
+env:
+  NODE_VERSION: "22"
+
+jobs:
+  build:
+    name: Pruebas, build y paquete
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            client/package-lock.json
+
+      - name: Pruebas
+        run: |
+          npm ci
+          npm test
+          npm ci --prefix client
+          npm test --prefix client
+
+      - name: Build del cliente
+        run: npm run build --prefix client
+
+      - name: Armar paquete de despliegue
+        run: |
+          set -euo pipefail
+          mkdir -p pkg/client pkg/Fotos360
+          cp server.js app.js package.json package-lock.json .deployment pkg/
+          cp -r client/dist pkg/client/dist
+          cp -r Fotos360/web Fotos360/thumbs pkg/Fotos360/
+          cat > pkg/build-info.json <<JSON
+          {"version":"${GITHUB_SHA::7}","commit":"${GITHUB_SHA}","run":"${GITHUB_RUN_NUMBER}","builtAt":"$(date -u +%FT%TZ)"}
+          JSON
+          (cd pkg && npm ci --omit=dev --ignore-scripts --no-audit --no-fund)
+          (cd pkg && zip -qr -9 ../app.zip . -x '*.DS_Store')
+          ls -lh app.zip
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: app-package
+          path: app.zip
+          retention-days: 30
+
+  dev:
+    name: Dev
+    needs: build
+    uses: ./.github/workflows/deploy-env.yml
+    with:
+      environment: dev
+
+  prod:
+    name: Prod
+    needs: dev # solo si dev quedó sano; además espera la aprobación del environment "prod"
+    uses: ./.github/workflows/deploy-env.yml
+    with:
+      environment: prod
