@@ -1,0 +1,25 @@
+name: Terraform init
+description: Instala Terraform e inicializa el backend remoto del ambiente indicado
+inputs:
+  environment:
+    description: dev | prod
+    required: true
+  state-resource-group:
+    required: true
+  state-storage-account:
+    required: true
+runs:
+  using: composite
+  steps:
+    - uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: "~1.9"
+        terraform_wrapper: false
+    - name: terraform init (${{ inputs.environment }})
+      shell: bash
+      working-directory: infra
+      run: |
+        terraform init -input=false \
+          -backend-config="backends/${{ inputs.environment }}.hcl" \
+          -backend-config="resource_group_name=${{ inputs.state-resource-group }}" \
+          -backend-config="storage_account_name=${{ inputs.state-storage-account }}"

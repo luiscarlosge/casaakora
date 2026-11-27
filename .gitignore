@@ -13,3 +13,13 @@ dist/
 # Fotos fuente sin procesar (se quedan locales)
 fotosPost/
 fotosPost-ordenadas/
+
+# Generado por el pipeline
+build-info.json
+
+# Terraform
+infra/.terraform/
+infra/*.tfplan
+infra/.terraform.tfstate.lock.info
+*.tfstate
+*.tfstate.*

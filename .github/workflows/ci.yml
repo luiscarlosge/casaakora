@@ -1,0 +1,117 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write # comentar el plan de Terraform en el PR
+  id-token: write      # OIDC hacia Azure (plan contra dev)
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: "22"
+
+jobs:
+  test:
+    name: Pruebas y build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            client/package-lock.json
+
+      - name: Dependencias del servidor
+        run: npm ci
+
+      - name: Pruebas del servidor
+        run: npm test
+
+      - name: Dependencias del cliente
+        run: npm ci
+        working-directory: client
+
+      - name: Pruebas del cliente
+        run: npm test
+        working-directory: client
+
+      - name: Build del cliente
+        run: npm run build
+        working-directory: client
+
+      - name: Auditoría de dependencias de producción
+        run: npm audit --omit=dev --audit-level=high
+
+  terraform:
+    name: Terraform fmt / validate / plan (dev)
+    runs-on: ubuntu-latest
+    env:
+      ARM_USE_OIDC: "true"
+      ARM_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID_DEV }}
+      ARM_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
+      ARM_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "~1.9"
+          terraform_wrapper: false
+
+      - name: terraform fmt
+        run: terraform fmt -check -recursive -diff
+        working-directory: infra
+
+      - name: terraform validate
+        working-directory: infra
+        run: |
+          terraform init -backend=false -input=false
+          terraform validate
+
+      # El plan necesita Azure: se omite en PRs desde forks (no reciben token OIDC)
+      - name: terraform init (dev)
+        if: github.event.pull_request.head.repo.full_name == github.repository || github.event_name == 'workflow_dispatch'
+        uses: ./.github/actions/terraform
+        with:
+          environment: dev
+          state-resource-group: ${{ vars.TFSTATE_RESOURCE_GROUP }}
+          state-storage-account: ${{ vars.TFSTATE_STORAGE_ACCOUNT }}
+
+      - name: terraform plan (dev)
+        id: plan
+        if: github.event.pull_request.head.repo.full_name == github.repository || github.event_name == 'workflow_dispatch'
+        working-directory: infra
+        run: |
+          terraform plan -input=false -lock=false -no-color \
+            -var-file=environments/dev.tfvars -out=dev.tfplan | tee plan.txt
+          {
+            echo '### Terraform plan — dev'
+            echo '```'
+            grep -E '^(Plan:|No changes)' plan.txt || true
+            echo '```'
+            echo '<details><summary>Plan completo</summary>'
+            echo
+            echo '```hcl'
+            tail -c 60000 plan.txt
+            echo '```'
+            echo '</details>'
+          } > plan.md
+          cat plan.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Comentar plan en el PR
+        if: steps.plan.outcome == 'success' && github.event_name == 'pull_request'
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: terraform-plan-dev
+          path: infra/plan.md
