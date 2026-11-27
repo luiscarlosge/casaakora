@@ -1,17 +1,39 @@
 version: 2
+# Agrupado para no recibir un PR por paquete. Los saltos de versión mayor que
+# requieren migración manual se ignoran y se hacen a propósito en una rama propia.
 updates:
   - package-ecosystem: npm
     directory: "/"
     schedule: { interval: monthly }
+    groups:
+      servidor:
+        patterns: ["*"]
+
   - package-ecosystem: npm
     directory: "/client"
     schedule: { interval: monthly }
     groups:
-      dev-tooling:
-        dependency-type: development
+      react:              # react y react-dom deben subir juntos
+        patterns: ["react", "react-dom"]
+      cliente:
+        patterns: ["*"]
+        exclude-patterns: ["react", "react-dom"]
+    ignore:
+      # Tailwind 4 cambia la configuración (CSS-first): migración manual
+      - dependency-name: tailwindcss
+        update-types: ["version-update:semver-major"]
+
   - package-ecosystem: github-actions
     directory: "/"
     schedule: { interval: monthly }
+    groups:
+      actions:
+        patterns: ["*"]
+
   - package-ecosystem: terraform
     directory: "/infra"
     schedule: { interval: monthly }
+    ignore:
+      # Un major del provider azurerm puede renombrar/eliminar atributos: migración manual
+      - dependency-name: hashicorp/azurerm
+        update-types: ["version-update:semver-major"]

@@ -70,8 +70,11 @@ function createApp() {
   // Resto de la app React compilada
   app.use(express.static(DIST_DIR, { maxAge: '1h' }));
 
-  // SPA fallback — todas las rutas van a index.html
-  app.get('*', (req, res) => {
+  // SPA fallback — cualquier GET/HEAD no resuelto va a index.html.
+  // Middleware (sin patrón de ruta) para ser compatible con Express 4 y 5
+  // (Express 5 ya no acepta el comodín '*').
+  app.use((req, res, next) => {
+    if (req.method !== 'GET' && req.method !== 'HEAD') return next();
     res.sendFile(path.join(DIST_DIR, 'index.html'), (err) => {
       if (err) res.status(404).send('Sitio no compilado. Ejecuta: npm run build');
     });
