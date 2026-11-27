@@ -35,9 +35,11 @@ resource "azurerm_service_plan" "this" {
   tags                = local.tags
 }
 
+# La región va en el nombre: un workspace borrado reserva su nombre ~14 días
+# en la región original y no se puede recrear con el mismo nombre en otra.
 resource "azurerm_log_analytics_workspace" "this" {
   count               = var.enable_app_insights ? 1 : 0
-  name                = "log-${var.app_name}"
+  name                = "log-${var.app_name}-${local.location}"
   resource_group_name = data.azurerm_resource_group.this.name
   location            = local.location
   sku                 = "PerGB2018"
@@ -48,7 +50,7 @@ resource "azurerm_log_analytics_workspace" "this" {
 
 resource "azurerm_application_insights" "this" {
   count               = var.enable_app_insights ? 1 : 0
-  name                = "appi-${var.app_name}"
+  name                = "appi-${var.app_name}-${local.location}"
   resource_group_name = data.azurerm_resource_group.this.name
   location            = local.location
   workspace_id        = azurerm_log_analytics_workspace.this[0].id
