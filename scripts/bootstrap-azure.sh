@@ -20,7 +20,7 @@
 # -----------------------------------------------------------------------------
 set -euo pipefail
 
-LOCATION="${LOCATION:-eastus}"
+LOCATION="${LOCATION:-westus}"
 GITHUB_REPO="${GITHUB_REPO:-luiscarlosge/casaakora}"
 PREFIX="casa-akora"
 TFSTATE_RG="rg-${PREFIX}-tfstate"
