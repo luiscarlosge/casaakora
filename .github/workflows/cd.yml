@@ -60,7 +60,7 @@ jobs:
           (cd pkg && zip -qr -9 ../app.zip . -x '*.DS_Store')
           ls -lh app.zip
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: app-package
           path: app.zip
