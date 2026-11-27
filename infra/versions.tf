@@ -17,7 +17,12 @@ terraform {
 }
 
 provider "azurerm" {
-  features {}
+  features {
+    log_analytics_workspace {
+      # Al destruir, borrar de verdad (sin soft-delete de 14 días que reserva el nombre)
+      permanently_delete_on_destroy = true
+    }
+  }
   # subscription_id / tenant_id / client_id llegan por variables de entorno ARM_*
   use_oidc = true
   # La identidad del pipeline solo tiene permisos sobre su resource group:
