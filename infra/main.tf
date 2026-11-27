@@ -1,5 +1,6 @@
 locals {
-  is_free = upper(var.sku_name) == "F1"
+  is_free  = upper(var.sku_name) == "F1"
+  location = coalesce(var.location, data.azurerm_resource_group.this.location)
 
   tags = merge({
     proyecto    = "casa-reserva-akora"
@@ -28,7 +29,7 @@ data "azurerm_resource_group" "this" {
 resource "azurerm_service_plan" "this" {
   name                = "asp-${var.app_name}"
   resource_group_name = data.azurerm_resource_group.this.name
-  location            = data.azurerm_resource_group.this.location
+  location            = local.location
   os_type             = "Linux"
   sku_name            = var.sku_name
   tags                = local.tags
@@ -38,7 +39,7 @@ resource "azurerm_log_analytics_workspace" "this" {
   count               = var.enable_app_insights ? 1 : 0
   name                = "log-${var.app_name}"
   resource_group_name = data.azurerm_resource_group.this.name
-  location            = data.azurerm_resource_group.this.location
+  location            = local.location
   sku                 = "PerGB2018"
   retention_in_days   = 30
   daily_quota_gb      = 0.5 # techo de costo
@@ -49,7 +50,7 @@ resource "azurerm_application_insights" "this" {
   count               = var.enable_app_insights ? 1 : 0
   name                = "appi-${var.app_name}"
   resource_group_name = data.azurerm_resource_group.this.name
-  location            = data.azurerm_resource_group.this.location
+  location            = local.location
   workspace_id        = azurerm_log_analytics_workspace.this[0].id
   application_type    = "Node.JS"
   tags                = local.tags
@@ -58,7 +59,7 @@ resource "azurerm_application_insights" "this" {
 resource "azurerm_linux_web_app" "this" {
   name                = var.app_name
   resource_group_name = data.azurerm_resource_group.this.name
-  location            = data.azurerm_resource_group.this.location
+  location            = local.location
   service_plan_id     = azurerm_service_plan.this.id
   https_only          = true
 
