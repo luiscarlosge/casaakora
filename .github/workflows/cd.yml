@@ -26,9 +26,9 @@ jobs:
     name: Pruebas, build y paquete
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
@@ -60,7 +60,7 @@ jobs:
           (cd pkg && zip -qr -9 ../app.zip . -x '*.DS_Store')
           ls -lh app.zip
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: app-package
           path: app.zip

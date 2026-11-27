@@ -66,3 +66,8 @@ test('incluye cabeceras de seguridad y oculta x-powered-by', async () => {
   assert.strictEqual(res.headers['x-content-type-options'], 'nosniff');
   assert.strictEqual(res.headers['x-powered-by'], undefined);
 });
+
+test('POST a una ruta desconocida devuelve 404 (el fallback SPA es solo GET)', async () => {
+  const res = await request(app).post('/cualquier/ruta');
+  assert.strictEqual(res.status, 404);
+});
