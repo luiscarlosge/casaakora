@@ -4,7 +4,7 @@ Resultado final:
 
 | Ambiente | URL | Plan | Cuándo se despliega |
 |---|---|---|---|
-| **dev** | https://casa-reserva-akora-dev.azurewebsites.net | B1 (~13 USD/mes) | Automático en cada push/merge a `main` |
+| **dev** | https://casa-reserva-akora-dev.azurewebsites.net | F1 (gratis) | Automático en cada push/merge a `main` |
 | **prod** | https://casa-reserva-akora.azurewebsites.net | B1 (~13 USD/mes) | Después de dev, **con tu aprobación** |
 
 ```
@@ -138,7 +138,7 @@ gh pr create --fill          # o desde la web
 ```
 
 1. En el PR corre **CI**: pruebas, build y el `terraform plan` de dev comentado en el PR
-   (en el primer PR mostrará `Plan: 2 to add`: plan B1 + web app).
+   (en el primer PR mostrará `Plan: 2 to add`: plan F1 + web app).
 2. Haz merge → corre **CD**:
    - `build` arma `app.zip` (~21 MB: servidor, `node_modules` de producción, `client/dist`,
      `Fotos360/web` y `Fotos360/thumbs` + `build-info.json` con el commit).
@@ -187,7 +187,7 @@ terraform plan -var-file=environments/prod.tfvars
 
 | Recurso | Costo aprox. |
 |---|---|
-| Plan B1 (dev) | ~13 USD/mes |
+| Plan F1 (dev) | 0 |
 | Plan B1 (prod) | ~13 USD/mes |
 | App Insights + Log Analytics (prod, techo 0.5 GB/día) | 0 dentro de los 5 GB/mes gratis |
 | Storage del estado | centavos |

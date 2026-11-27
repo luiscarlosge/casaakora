@@ -12,6 +12,12 @@ variable "resource_group_name" {
   type        = string
 }
 
+variable "location" {
+  description = "Región de los recursos. Si es null se usa la del resource group."
+  type        = string
+  default     = null
+}
+
 variable "app_name" {
   description = "Nombre de la Web App. Define la URL: <app_name>.azurewebsites.net (único a nivel global)."
   type        = string
